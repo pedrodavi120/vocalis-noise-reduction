@@ -1,24 +1,42 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 import os
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
+# Garante que 'src' esteja acessível durante o processo de análise do PyInstaller
+SRC_DIR = os.path.abspath('src')
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 
 block_cipher = None
 
+# Coleta todos os módulos internos do pacote vocalis
+vocalis_modules = collect_submodules('vocalis')
+
+hidden_imports = [
+    'sounddevice',
+    'soundfile',
+    'noisereduce',
+    'scipy',
+    'scipy.signal',
+    'numpy',
+    'PySide6',
+    'cffi',
+] + vocalis_modules
+
+# Garante a inclusão dos arquivos de assets e do código fonte como fallback
+datas = [
+    ('logo.png', '.'),
+    ('icon.ico', '.'),
+    ('src/vocalis', 'vocalis'),
+]
+
 a = Analysis(
     ['run.py'],
-    pathex=['src'],
+    pathex=[SRC_DIR, os.path.abspath('.')],
     binaries=[],
-    datas=[('logo.png', '.'), ('icon.ico', '.')],
-    hiddenimports=[
-        'sounddevice',
-        'soundfile',
-        'noisereduce',
-        'scipy',
-        'scipy.signal',
-        'numpy',
-        'PySide6',
-        'cffi'
-    ],
+    datas=datas,
+    hiddenimports=hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

@@ -27,8 +27,18 @@ def _custom_find_library(name):
 
 ctypes.util.find_library = _custom_find_library
 
-# Adiciona o diretório 'src' ao sys.path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+# Adiciona o diretório 'src' e _MEIPASS ao sys.path para suportar execução local e empacotada
+if getattr(sys, 'frozen', False):
+    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    if base_dir not in sys.path:
+        sys.path.insert(0, base_dir)
+    src_dir = os.path.join(base_dir, "src")
+    if os.path.exists(src_dir) and src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
+else:
+    src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
+    if src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
 
 from vocalis.__main__ import main
 
