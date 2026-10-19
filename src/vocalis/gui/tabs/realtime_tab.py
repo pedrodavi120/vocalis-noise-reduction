@@ -44,8 +44,9 @@ class RealtimeTab(QWidget):
 
         # 1. Card de Configuração de Dispositivos
         dev_frame = QFrame()
-        dev_frame.setStyleSheet("background-color: #FAFAFA; border: 1px solid #E4E7EC; border-radius: 10px; padding: 10px;")
+        dev_frame.setObjectName("DevCard")
         df_layout = QVBoxLayout(dev_frame)
+        df_layout.setContentsMargins(14, 12, 14, 12)
         df_layout.setSpacing(6)
 
         lbl_input = QLabel("Microfone Físico (Entrada):")
@@ -61,7 +62,7 @@ class RealtimeTab(QWidget):
         df_layout.addWidget(self.combo_output)
 
         btn_refresh = QPushButton("Atualizar Lista de Dispositivos")
-        btn_refresh.setProperty("class", "GhostButton")
+        btn_refresh.setObjectName("GhostButton")
         btn_refresh.setFixedHeight(30)
         btn_refresh.clicked.connect(self.refresh_devices)
         df_layout.addWidget(btn_refresh, alignment=Qt.AlignmentFlag.AlignRight)
@@ -70,8 +71,9 @@ class RealtimeTab(QWidget):
 
         # 2. Controles de Processamento
         ctrl_frame = QFrame()
-        ctrl_frame.setStyleSheet("background-color: #FAFAFA; border: 1px solid #E4E7EC; border-radius: 10px; padding: 10px;")
+        ctrl_frame.setObjectName("CtrlCard")
         cf_layout = QVBoxLayout(ctrl_frame)
+        cf_layout.setContentsMargins(14, 12, 14, 12)
         cf_layout.setSpacing(8)
 
         # Noise Gate

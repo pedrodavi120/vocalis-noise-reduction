@@ -18,45 +18,26 @@ from vocalis.gui.styles import (
 class AnimatedButton(QPushButton):
     def __init__(self, text: str, shadow_color: QColor = QColor(159, 85, 255), parent=None):
         super().__init__(text, parent)
-        self.setProperty("class", "PrimaryButton")
+        self.setFixedHeight(46)
 
         self.shadow = QGraphicsDropShadowEffect(self)
         self.shadow_color = shadow_color
         self.shadow.setBlurRadius(10)
-        self.shadow.setColor(shadow_color.lighter(150).lighter(150))
+        self.shadow.setColor(QColor(159, 85, 255, 90))
         self.shadow.setOffset(0, 3)
         self.setGraphicsEffect(self.shadow)
 
-        self.initial_geometry = self.geometry()
-        self.pos_anim = QPropertyAnimation(self, b"geometry", self)
-        self.pos_anim.setDuration(180)
-        self.pos_anim.setEasingCurve(QEasingCurve.Type.OutQuad)
-
         self.shadow_anim = QPropertyAnimation(self.shadow, b"blurRadius", self)
-        self.shadow_anim.setDuration(180)
+        self.shadow_anim.setDuration(160)
         self.shadow_anim.setEasingCurve(QEasingCurve.Type.OutQuad)
 
-    def update_initial_geometry(self):
-        self.initial_geometry = self.geometry()
-
     def enterEvent(self, event):
-        if self.initial_geometry.isEmpty():
-            self.update_initial_geometry()
-
-        self.pos_anim.setStartValue(self.geometry())
-        self.pos_anim.setEndValue(self.initial_geometry.translated(0, -2))
-        self.pos_anim.start()
-
         self.shadow_anim.setStartValue(self.shadow.blurRadius())
         self.shadow_anim.setEndValue(18)
         self.shadow_anim.start()
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.pos_anim.setStartValue(self.geometry())
-        self.pos_anim.setEndValue(self.initial_geometry)
-        self.pos_anim.start()
-
         self.shadow_anim.setStartValue(self.shadow.blurRadius())
         self.shadow_anim.setEndValue(10)
         self.shadow_anim.start()

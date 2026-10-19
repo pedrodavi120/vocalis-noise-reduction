@@ -96,11 +96,11 @@ class RecorderTab(QWidget):
         playback_layout.setSpacing(12)
 
         self.play_orig_button = QPushButton("Ouvir Original")
-        self.play_orig_button.setProperty("class", "GhostButton")
+        self.play_orig_button.setObjectName("GhostButton")
         self.play_orig_button.clicked.connect(lambda: self.play_audio(FILENAME_ORIGINAL))
 
         self.play_clean_button = QPushButton("Ouvir Limpo")
-        self.play_clean_button.setProperty("class", "GhostButton")
+        self.play_clean_button.setObjectName("GhostButton")
         self.play_clean_button.clicked.connect(lambda: self.play_audio(FILENAME_CLEAN))
 
         playback_layout.addWidget(self.play_orig_button)

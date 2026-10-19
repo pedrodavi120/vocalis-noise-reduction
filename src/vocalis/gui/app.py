@@ -27,7 +27,7 @@ class VocalisMainWindow(QMainWindow):
         self.oldPos = None
 
         self.setWindowTitle("Vocalis Studio")
-        self.setFixedSize(520, 680)
+        self.setFixedSize(540, 710)
         self.setObjectName("JanelaPrincipal")
 
         # Janela moderna sem bordas do SO
@@ -52,8 +52,8 @@ class VocalisMainWindow(QMainWindow):
         self.main_container = QFrame()
         self.main_container.setObjectName("MainContainer")
         self.container_layout = QVBoxLayout(self.main_container)
-        self.container_layout.setContentsMargins(22, 12, 22, 20)
-        self.container_layout.setSpacing(10)
+        self.container_layout.setContentsMargins(24, 16, 24, 24)
+        self.container_layout.setSpacing(14)
 
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(28)
@@ -94,34 +94,31 @@ class VocalisMainWindow(QMainWindow):
         title_bar = QFrame()
         title_bar.setObjectName("TitleBar")
         t_layout = QHBoxLayout(title_bar)
-        t_layout.setContentsMargins(4, 2, 4, 2)
+        t_layout.setContentsMargins(4, 2, 4, 4)
+        t_layout.setSpacing(8)
 
-        ghost = QWidget()
-        ghost.setFixedWidth(32)
-        t_layout.addWidget(ghost)
-        t_layout.addStretch()
-
-        title_label = QLabel("Vocalis Studio")
-        title_label.setObjectName("TitleLabel")
-        t_layout.addWidget(title_label)
-        t_layout.addStretch()
-
-        btn_box = QWidget()
-        b_layout = QHBoxLayout(btn_box)
-        b_layout.setContentsMargins(0, 0, 0, 0)
-        b_layout.setSpacing(6)
-
+        # Controles clássicos do macOS (Traffic Lights) à esquerda
         btn_close = QPushButton("×")
         btn_close.setObjectName("MacCloseButton")
+        btn_close.setFixedSize(12, 12)
+        btn_close.setToolTip("Fechar")
         btn_close.clicked.connect(self.close)
 
         btn_min = QPushButton("–")
         btn_min.setObjectName("MacMinimizeButton")
+        btn_min.setFixedSize(12, 12)
+        btn_min.setToolTip("Minimizar")
         btn_min.clicked.connect(self.showMinimized)
 
-        b_layout.addWidget(btn_close)
-        b_layout.addWidget(btn_min)
-        t_layout.addWidget(btn_box)
+        btn_zoom = QPushButton("+")
+        btn_zoom.setObjectName("MacZoomButton")
+        btn_zoom.setFixedSize(12, 12)
+        btn_zoom.setToolTip("Ajustar")
+
+        t_layout.addWidget(btn_close)
+        t_layout.addWidget(btn_min)
+        t_layout.addWidget(btn_zoom)
+        t_layout.addStretch()
 
         self.container_layout.addWidget(title_bar)
 
@@ -133,7 +130,7 @@ class VocalisMainWindow(QMainWindow):
 
         if not pixmap.isNull():
             logo_label.setPixmap(pixmap.scaled(
-                220, 55,
+                230, 58,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation
             ))

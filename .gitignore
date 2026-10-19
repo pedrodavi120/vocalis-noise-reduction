@@ -44,6 +44,10 @@ venv.bak/
 *.spec.bak
 *.exe
 *.bin
+releases/linux/vocalis
+releases/*/*.exe
+releases/*/*.bin
+releases/*/*.zip
 
 # Testing and coverage
 .pytest_cache/

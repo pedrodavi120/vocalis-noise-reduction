@@ -50,9 +50,11 @@ class FileTab(QWidget):
 
         # Card de Seleção de Arquivo (Área de Drop interativa)
         self.file_box = QFrame()
-        self.file_box.setStyleSheet("background-color: #FBFBFC; border: 2px dashed #D0D5DD; border-radius: 12px; padding: 14px;")
+        self.file_box.setObjectName("FileDropCard")
         fb_layout = QVBoxLayout(self.file_box)
         fb_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        fb_layout.setContentsMargins(16, 20, 16, 20)
+        fb_layout.setSpacing(10)
 
         self.file_label = QLabel("Arraste e solte um arquivo de áudio aqui\nou clique no botão abaixo (.wav, .mp3, .ogg, .flac)")
         self.file_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -60,7 +62,7 @@ class FileTab(QWidget):
         fb_layout.addWidget(self.file_label)
 
         btn_select = QPushButton("Selecionar Arquivo")
-        btn_select.setProperty("class", "GhostButton")
+        btn_select.setObjectName("GhostButton")
         btn_select.clicked.connect(self.select_file)
         fb_layout.addWidget(btn_select, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -109,17 +111,17 @@ class FileTab(QWidget):
         actions_layout.setSpacing(10)
 
         self.btn_play_orig = QPushButton("Ouvir Original")
-        self.btn_play_orig.setProperty("class", "GhostButton")
+        self.btn_play_orig.setObjectName("GhostButton")
         self.btn_play_orig.setEnabled(False)
         self.btn_play_orig.clicked.connect(lambda: self.play_audio(self.input_file))
 
         self.btn_play_clean = QPushButton("Ouvir Limpo")
-        self.btn_play_clean.setProperty("class", "GhostButton")
+        self.btn_play_clean.setObjectName("GhostButton")
         self.btn_play_clean.setEnabled(False)
         self.btn_play_clean.clicked.connect(lambda: self.play_audio(self.output_file))
 
         self.btn_export = QPushButton("Exportar Como...")
-        self.btn_export.setProperty("class", "GhostButton")
+        self.btn_export.setObjectName("GhostButton")
         self.btn_export.setEnabled(False)
         self.btn_export.clicked.connect(self.export_file)
 

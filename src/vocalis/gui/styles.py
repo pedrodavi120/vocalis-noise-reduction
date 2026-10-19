@@ -2,16 +2,30 @@ import os
 import sys
 
 def resource_path(relative_path: str) -> str:
-    """Retorna o caminho absoluto do recurso, compatível com PyInstaller."""
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        # Tenta localizar a partir da raiz do repositório ou diretório atual
-        current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        if os.path.exists(os.path.join(current_dir, relative_path)):
-            return os.path.join(current_dir, relative_path)
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+    """Retorna o caminho absoluto do recurso, compatível com PyInstaller e modo desenvolvimento."""
+    if hasattr(sys, "_MEIPASS"):
+        meipass_candidate = os.path.join(sys._MEIPASS, relative_path)
+        if os.path.exists(meipass_candidate):
+            return meipass_candidate
+
+    # 1. Diretório do módulo gui
+    gui_dir = os.path.dirname(os.path.abspath(__file__))
+    candidate_gui = os.path.join(gui_dir, relative_path)
+    if os.path.exists(candidate_gui):
+        return candidate_gui
+
+    # 2. Raiz do repositório
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(gui_dir)))
+    candidate_repo = os.path.join(repo_root, relative_path)
+    if os.path.exists(candidate_repo):
+        return candidate_repo
+
+    # 3. Diretório de execução atual
+    cwd_candidate = os.path.abspath(relative_path)
+    if os.path.exists(cwd_candidate):
+        return cwd_candidate
+
+    return candidate_gui
 
 # Paleta "Clean White"
 COLOR_BG = "transparent"
@@ -30,9 +44,14 @@ COLOR_SUCCESS = "#27C93F"
 
 # Controles macOS
 COLOR_MAC_CLOSE = "#FF5F56"
+COLOR_MAC_CLOSE_BORDER = "#E0443E"
 COLOR_MAC_MINIMIZE = "#FFBD2E"
-COLOR_MAC_CLOSE_ICON = "#990000"
-COLOR_MAC_MINIMIZE_ICON = "#995700"
+COLOR_MAC_MINIMIZE_BORDER = "#DEA123"
+COLOR_MAC_ZOOM = "#27C93F"
+COLOR_MAC_ZOOM_BORDER = "#1AAB29"
+COLOR_MAC_CLOSE_ICON = "#4D0000"
+COLOR_MAC_MINIMIZE_ICON = "#5E3900"
+COLOR_MAC_ZOOM_ICON = "#00470A"
 
 STYLESHEET = f"""
     #JanelaPrincipal {{
@@ -55,43 +74,48 @@ STYLESHEET = f"""
 
     #TitleBar {{
         background-color: transparent;
-        height: 40px;
+        height: 36px;
     }}
 
-    #TitleLabel {{
-        color: {COLOR_TEXT};
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }}
-
-    #MacCloseButton, #MacMinimizeButton {{
-        background: none;
-        border: none;
+    #MacCloseButton, #MacMinimizeButton, #MacZoomButton {{
+        border-radius: 6px;
         min-width: 12px;
         max-width: 12px;
+        width: 12px;
         min-height: 12px;
         max-height: 12px;
-        border-radius: 6px;
+        height: 12px;
         padding: 0px;
         margin: 0px;
         color: transparent;
-        font-size: 9px;
-        font-weight: 700;
+        font-size: 8px;
+        font-weight: 800;
+        text-align: center;
+        line-height: 12px;
     }}
 
     #MacCloseButton {{
-        background-color: {COLOR_MAC_CLOSE};
+        background: {COLOR_MAC_CLOSE};
+        border: 1px solid {COLOR_MAC_CLOSE_BORDER};
     }}
     #MacCloseButton:hover {{
         color: {COLOR_MAC_CLOSE_ICON};
     }}
 
     #MacMinimizeButton {{
-        background-color: {COLOR_MAC_MINIMIZE};
+        background: {COLOR_MAC_MINIMIZE};
+        border: 1px solid {COLOR_MAC_MINIMIZE_BORDER};
     }}
     #MacMinimizeButton:hover {{
         color: {COLOR_MAC_MINIMIZE_ICON};
+    }}
+
+    #MacZoomButton {{
+        background: {COLOR_MAC_ZOOM};
+        border: 1px solid {COLOR_MAC_ZOOM_BORDER};
+    }}
+    #MacZoomButton:hover {{
+        color: {COLOR_MAC_ZOOM_ICON};
     }}
 
     /* Abas de Navegação Superiores */
@@ -122,8 +146,8 @@ STYLESHEET = f"""
         border: 1px solid {COLOR_BORDER};
     }}
 
-    /* Botão Principal */
-    QPushButton.PrimaryButton {{
+    /* Botões Principais */
+    QPushButton {{
         font-size: 15px;
         font-weight: 600;
         color: {COLOR_CARD};
@@ -134,17 +158,17 @@ STYLESHEET = f"""
         height: 44px;
         padding: 0 16px;
     }}
-    QPushButton.PrimaryButton:hover {{
+    QPushButton:hover {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
                                     stop:0 {COLOR_PRIMARY_LIGHT}, stop:1 {COLOR_PRIMARY});
     }}
-    QPushButton.PrimaryButton:disabled {{
+    QPushButton:disabled {{
         background: {COLOR_DISABLED};
         color: {COLOR_DISABLED_TEXT};
     }}
 
     /* Botão Fantasma / Secundário */
-    QPushButton.GhostButton {{
+    QPushButton#GhostButton, QPushButton[class="GhostButton"] {{
         background-color: transparent;
         border: 1px solid {COLOR_PRIMARY};
         color: {COLOR_PRIMARY};
@@ -154,32 +178,58 @@ STYLESHEET = f"""
         font-weight: 500;
         padding: 0 12px;
     }}
-    QPushButton.GhostButton:hover {{
+    QPushButton#GhostButton:hover, QPushButton[class="GhostButton"]:hover {{
         background-color: {COLOR_PRIMARY};
         color: {COLOR_CARD};
     }}
-    QPushButton.GhostButton:disabled {{
+    QPushButton#GhostButton:disabled, QPushButton[class="GhostButton"]:disabled {{
         border-color: {COLOR_DISABLED_TEXT};
         color: {COLOR_DISABLED_TEXT};
+        background-color: transparent;
     }}
 
     /* Botão de Gravação */
-    QPushButton.RecordButton[recording="true"] {{
+    QPushButton#RecordButton[recording="true"], QPushButton[recording="true"] {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
                                     stop:0 {COLOR_RECORDING}, stop:1 {COLOR_STOP});
         color: white;
     }}
 
-    QComboBox {{
+    /* Cards e Containers internos (usando IDs para evitar propagação para filhos) */
+    QFrame#CardBox, QFrame#DevCard, QFrame#CtrlCard {{
         background-color: #FAFAFA;
-        border: 1px solid {COLOR_BORDER};
+        border: 1px solid #E4E7EC;
+        border-radius: 10px;
+    }}
+
+    QFrame#FileDropCard {{
+        background-color: #FBFBFC;
+        border: 2px dashed #D0D5DD;
+        border-radius: 12px;
+    }}
+
+    QComboBox {{
+        background-color: #FFFFFF;
+        border: 1px solid #D0D5DD;
         border-radius: 8px;
-        padding: 8px 12px;
+        padding: 6px 10px;
+        min-height: 24px;
         font-size: 13px;
         color: {COLOR_TEXT};
     }}
+    QComboBox:hover {{
+        border: 1px solid {COLOR_PRIMARY};
+    }}
     QComboBox::drop-down {{
         border: none;
+        width: 20px;
+    }}
+    QComboBox QAbstractItemView {{
+        background-color: #FFFFFF;
+        color: {COLOR_TEXT};
+        selection-background-color: {COLOR_PRIMARY};
+        selection-color: #FFFFFF;
+        border: 1px solid {COLOR_BORDER};
     }}
 
     QSlider::groove:horizontal {{
