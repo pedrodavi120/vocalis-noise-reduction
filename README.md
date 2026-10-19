@@ -138,8 +138,15 @@ Contribuições são muito bem-vindas! Consulte o guia [CONTRIBUTING.md](CONTRIB
 
 ---
 
+## Autoria e Propriedade
+
+- **Proprietária do Projeto**: [Void Studio](https://www.voidstudio.com.br)
+- **Desenvolvedor Responsável & CEO**: [Pedro Davi](https://github.com/pedrodavi120) (<pedrodavi120@gmail.com>)
+
+---
+
 ## Licença
 
-Distribuído sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais informações.
+Distribuído sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-Desenvolvido por **[Pedro Davi](https://github.com/pedrodavi120)**.
+Copyright © 2024-2026 **[Void Studio](https://www.voidstudio.com.br)** & **Pedro Davi**. Todos os direitos reservados.

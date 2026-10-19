@@ -8,7 +8,13 @@ version = "1.0.0"
 description = "AI-Powered Noise Reduction Studio & Virtual Microphone"
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "Pedro Davi", email = "pedrodavi120@gmail.com" }]
+authors = [
+    { name = "Pedro Davi (CEO, Void Studio)", email = "pedrodavi120@gmail.com" },
+]
+maintainers = [
+    { name = "Void Studio", email = "contato@voidstudio.com.br" }
+]
+urls = { "Homepage" = "https://www.voidstudio.com.br", "Repository" = "https://github.com/pedrodavi120/vocalis-noise-reduction" }
 license = { text = "MIT" }
 dependencies = [
     "PySide6>=6.5.0",

@@ -1,8 +1,16 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.pyd
+
+# C extensions
+*.c
+*.o
+*.obj
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -22,27 +30,61 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environments
+# Virtual environments
 .venv/
 venv/
 ENV/
 env/
+.env/
+env.bak/
+venv.bak/
 
-# PyInstaller
+# PyInstaller & executáveis
 *.manifest
 *.spec.bak
+*.exe
+*.bin
 
-# Testing
+# Testing and coverage
 .pytest_cache/
 .coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
 htmlcov/
+.hypothesis/
 
-# Audios gerados localmente
-gravacao_original.wav
-gravacao_limpa.wav
-limpo_*.wav
+# Áudios gravados ou processados localmente
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+!assets/*.wav
 
-# IDEs
+# Arquivos de Sistema & SO
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Editores & IDEs
 .vscode/
 .idea/
+*.sublime-workspace
+*.sublime-project
 *.swp
+*.swo
+*~
+
+# Logs & temporários
+*.log
+/tmp/
+.temp/
