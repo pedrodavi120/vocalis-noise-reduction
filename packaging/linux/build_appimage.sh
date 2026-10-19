@@ -13,8 +13,9 @@ if [ ! -f "$BIN_SRC" ]; then
     exit 1
 fi
 
+TOOL_TMP_DIR=""
 APP_DIR="$(mktemp -d -t vocalis-appdir-XXXXXX)"
-trap 'rm -rf "$APP_DIR"' EXIT
+trap 'rm -rf "$APP_DIR" "$TOOL_TMP_DIR"' EXIT
 
 echo "==> Preparing AppDir in $APP_DIR..."
 mkdir -p "$APP_DIR/usr/bin"
@@ -61,17 +62,19 @@ if [ -z "$APPIMAGETOOL" ] && command -v appimagetool >/dev/null 2>&1; then
 fi
 
 if [ -z "$APPIMAGETOOL" ]; then
-    echo "==> Downloading appimagetool..."
+    echo "==> Downloading appimagetool into secure temporary directory..."
+    TOOL_TMP_DIR="$(mktemp -d -t vocalis-apptool-XXXXXX)"
+    TOOL_BIN="$TOOL_TMP_DIR/appimagetool"
     TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
-    curl -sL "$TOOL_URL" -o /tmp/appimagetool
-    chmod +x /tmp/appimagetool
+    curl -sL "$TOOL_URL" -o "$TOOL_BIN"
+    chmod +x "$TOOL_BIN"
     # In container or non-FUSE environments, extract appimagetool
-    if ! /tmp/appimagetool --version >/dev/null 2>&1; then
+    if ! "$TOOL_BIN" --version >/dev/null 2>&1; then
         echo "==> Extracting appimagetool for non-FUSE environment..."
-        (cd /tmp && ./appimagetool --appimage-extract >/dev/null)
-        APPIMAGETOOL="/tmp/squashfs-root/AppRun"
+        (cd "$TOOL_TMP_DIR" && "$TOOL_BIN" --appimage-extract >/dev/null)
+        APPIMAGETOOL="$TOOL_TMP_DIR/squashfs-root/AppRun"
     else
-        APPIMAGETOOL="/tmp/appimagetool"
+        APPIMAGETOOL="$TOOL_BIN"
     fi
 fi
 
