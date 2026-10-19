@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 import os
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
 
 # Garante que 'src' esteja acessível durante o processo de análise do PyInstaller
 SRC_DIR = os.path.abspath('src')
@@ -10,8 +10,10 @@ if SRC_DIR not in sys.path:
 
 block_cipher = None
 
-# Coleta todos os módulos internos do pacote vocalis
+# Coleta todos os módulos internos do pacote vocalis, pyrnnoise e audiolab
 vocalis_modules = collect_submodules('vocalis')
+pyrnnoise_modules = collect_submodules('pyrnnoise')
+audiolab_modules = collect_submodules('audiolab')
 
 hidden_imports = [
     'sounddevice',
@@ -22,19 +24,24 @@ hidden_imports = [
     'numpy',
     'PySide6',
     'cffi',
-] + vocalis_modules
+    'pyrnnoise',
+    'audiolab',
+] + vocalis_modules + pyrnnoise_modules + audiolab_modules
 
-# Garante a inclusão dos arquivos de assets e do código fonte como fallback
+# Garante inclusão de binários nativos do RNNoise (rnnoise.dll no Windows / librnnoise.so no Linux)
+binaries = collect_dynamic_libs('pyrnnoise')
+
+# Garante a inclusão dos arquivos de assets, templates do audiolab e metadados
 datas = [
     ('logo.png', '.'),
     ('icon.ico', '.'),
     ('src/vocalis', 'vocalis'),
-]
+] + collect_data_files('pyrnnoise') + collect_data_files('audiolab')
 
 a = Analysis(
     ['run.py'],
     pathex=[SRC_DIR, os.path.abspath('.')],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=hidden_imports,
     hookspath=[],

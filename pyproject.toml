@@ -23,6 +23,7 @@ dependencies = [
     "noisereduce>=3.0.2",
     "scipy>=1.11.0",
     "numpy>=1.24.0",
+    "pyrnnoise>=0.4.5",
 ]
 
 [project.scripts]

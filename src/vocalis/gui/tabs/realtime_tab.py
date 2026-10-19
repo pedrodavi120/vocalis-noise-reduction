@@ -188,8 +188,8 @@ class RealtimeTab(QWidget):
             self.engine = RealtimeDenoiseEngine(
                 input_device_index=in_id,
                 output_device_index=out_id,
-                sample_rate=44100,
-                block_size=512,
+                sample_rate=48000,
+                block_size=480,
                 gate_threshold_db=gate_db,
                 denoise_strength=strength,
                 enable_highpass=True,
