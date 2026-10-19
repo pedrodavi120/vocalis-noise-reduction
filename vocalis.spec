@@ -1,12 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+import os
 
+block_cipher = None
 
 a = Analysis(
-    ['vocalis.py'],
-    pathex=[],
+    ['run.py'],
+    pathex=['src'],
     binaries=[],
     datas=[('logo.png', '.'), ('icon.ico', '.')],
-    hiddenimports=['sounddevice', 'soundfile', 'noisereduce', 'cffi'],
+    hiddenimports=[
+        'sounddevice',
+        'soundfile',
+        'noisereduce',
+        'scipy',
+        'scipy.signal',
+        'numpy',
+        'PySide6',
+        'cffi'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -14,12 +26,13 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
+    a.zipfiles,
     a.datas,
     [],
     name='vocalis',
