@@ -45,13 +45,16 @@ class FileTab(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(14)
 
-        # Card de Seleção de Arquivo
-        file_box = QFrame()
-        file_box.setStyleSheet("background-color: #FBFBFC; border: 1px dashed #D0D5DD; border-radius: 12px; padding: 10px;")
-        fb_layout = QVBoxLayout(file_box)
+        # Habilita Drag and Drop na aba inteira
+        self.setAcceptDrops(True)
+
+        # Card de Seleção de Arquivo (Área de Drop interativa)
+        self.file_box = QFrame()
+        self.file_box.setStyleSheet("background-color: #FBFBFC; border: 2px dashed #D0D5DD; border-radius: 12px; padding: 14px;")
+        fb_layout = QVBoxLayout(self.file_box)
         fb_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.file_label = QLabel("Nenhum arquivo selecionado\n(Clique abaixo para escolher um arquivo de áudio)")
+        self.file_label = QLabel("Arraste e solte um arquivo de áudio aqui\nou clique no botão abaixo (.wav, .mp3, .ogg, .flac)")
         self.file_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.file_label.setStyleSheet("color: #475467; font-size: 13px; font-weight: 500;")
         fb_layout.addWidget(self.file_label)
@@ -61,7 +64,7 @@ class FileTab(QWidget):
         btn_select.clicked.connect(self.select_file)
         fb_layout.addWidget(btn_select, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        layout.addWidget(file_box)
+        layout.addWidget(self.file_box)
 
         # Ajuste de Intensidade de Redução
         slider_box = QWidget()
@@ -136,6 +139,32 @@ class FileTab(QWidget):
     def _on_slider_changed(self, val: int):
         self.slider_label.setText(f"Intensidade da Redução de Ruído: {val}%")
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+            self.file_box.setStyleSheet("background-color: #F0F4FF; border: 2px dashed #9F55FF; border-radius: 12px; padding: 14px;")
+
+    def dragLeaveEvent(self, event):
+        self.file_box.setStyleSheet("background-color: #FBFBFC; border: 2px dashed #D0D5DD; border-radius: 12px; padding: 14px;")
+
+    def dropEvent(self, event):
+        self.file_box.setStyleSheet("background-color: #FBFBFC; border: 2px dashed #D0D5DD; border-radius: 12px; padding: 14px;")
+        urls = event.mimeData().urls()
+        if urls:
+            file_path = urls[0].toLocalFile()
+            if os.path.exists(file_path):
+                self._load_selected_file(file_path)
+
+    def _load_selected_file(self, file_path: str):
+        self.input_file = file_path
+        filename = os.path.basename(file_path)
+        self.file_label.setText(f"Arquivo selecionado:\n{filename}")
+        self.btn_process.setEnabled(True)
+        self.btn_play_orig.setEnabled(True)
+        self.btn_play_clean.setEnabled(False)
+        self.btn_export.setEnabled(False)
+        self.set_status("Pronto para processar.", COLOR_TEXT_SECONDARY)
+
     def select_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -144,14 +173,7 @@ class FileTab(QWidget):
             "Arquivos de Áudio (*.wav *.mp3 *.ogg *.flac *.m4a);;Todos os Arquivos (*)"
         )
         if file_path:
-            self.input_file = file_path
-            filename = os.path.basename(file_path)
-            self.file_label.setText(f"Arquivo selecionado:\n{filename}")
-            self.btn_process.setEnabled(True)
-            self.btn_play_orig.setEnabled(True)
-            self.btn_play_clean.setEnabled(False)
-            self.btn_export.setEnabled(False)
-            self.set_status("Pronto para processar.", COLOR_TEXT_SECONDARY)
+            self._load_selected_file(file_path)
 
     def process_file(self):
         if not self.input_file or not os.path.exists(self.input_file):
