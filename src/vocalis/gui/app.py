@@ -91,9 +91,9 @@ class VocalisMainWindow(QMainWindow):
         self.realtime_tab.signals.notification_requested.connect(self.show_notification)
 
     def _build_title_bar(self):
-        title_bar = QFrame()
-        title_bar.setObjectName("TitleBar")
-        t_layout = QHBoxLayout(title_bar)
+        self.title_bar = QFrame()
+        self.title_bar.setObjectName("TitleBar")
+        t_layout = QHBoxLayout(self.title_bar)
         t_layout.setContentsMargins(4, 2, 4, 4)
         t_layout.setSpacing(8)
 
@@ -120,7 +120,7 @@ class VocalisMainWindow(QMainWindow):
         t_layout.addWidget(btn_zoom)
         t_layout.addStretch()
 
-        self.container_layout.addWidget(title_bar)
+        self.container_layout.addWidget(self.title_bar)
 
     def _build_logo(self):
         logo_label = QLabel()
@@ -184,25 +184,40 @@ class VocalisMainWindow(QMainWindow):
             self.realtime_tab.cleanup()
         super().closeEvent(event)
 
-    # Arrastar janela sem borda
+    # Arrastar janela sem borda: restrito exclusivamente à barra de título
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            child = self.childAt(event.position().toPoint())
-            interactive = (QPushButton, QFrame)
-            is_interactive = False
-            curr = child
-            while curr:
-                if isinstance(curr, QPushButton):
-                    is_interactive = True
-                    break
-                curr = curr.parent()
-            if not is_interactive:
+            pos = event.position().toPoint()
+            # Verifica se o clique ocorreu na área da TitleBar ou no topo do container
+            title_rect = self.title_bar.geometry() if hasattr(self, 'title_bar') else None
+            child = self.childAt(pos)
+            is_title_area = False
+            if title_rect and title_rect.contains(pos):
+                is_title_area = True
+            elif pos.y() <= 40:
+                is_title_area = True
+
+            # Nunca inicia arraste se o clique foi sobre botões da barra (fechar, minimizar)
+            if is_title_area and not isinstance(child, QPushButton):
+                window_handle = self.windowHandle()
+                if window_handle is not None and hasattr(window_handle, 'startSystemMove'):
+                    window_handle.startSystemMove()
+                    return
                 self.oldPos = event.globalPosition().toPoint()
-            else:
-                self.oldPos = None
+                return
+
+        self.oldPos = None
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton and self.oldPos is not None:
             delta = QPoint(event.globalPosition().toPoint() - self.oldPos)
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPos = event.globalPosition().toPoint()
+            event.accept()
+        else:
+            super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.oldPos = None
+        super().mouseReleaseEvent(event)

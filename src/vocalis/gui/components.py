@@ -150,10 +150,15 @@ class NotificationPopup(QFrame):
 
         self.opacity_anim = QPropertyAnimation(self, b"windowOpacity", self)
         self.opacity_anim.setDuration(250)
+        self.opacity_anim.finished.connect(self._on_opacity_finished)
 
         self.hide_timer = QTimer(self)
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.hide_notification)
+
+    def _on_opacity_finished(self):
+        if self.windowOpacity() <= 0.05:
+            self.hide()
 
     def show_notification(self, message: str):
         self.label.setText(message)
@@ -177,4 +182,3 @@ class NotificationPopup(QFrame):
         self.opacity_anim.setStartValue(1.0)
         self.opacity_anim.setEndValue(0.0)
         self.opacity_anim.start()
-        self.opacity_anim.finished.connect(self.hide)
