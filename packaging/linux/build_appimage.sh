@@ -19,30 +19,42 @@ trap 'rm -rf "$APP_DIR"' EXIT
 echo "==> Preparing AppDir in $APP_DIR..."
 mkdir -p "$APP_DIR/usr/bin"
 mkdir -p "$APP_DIR/usr/lib"
+mkdir -p "$APP_DIR/usr/share/applications"
 mkdir -p "$APP_DIR/usr/share/icons/hicolor/256x256/apps"
+mkdir -p "$APP_DIR/usr/share/metainfo"
 
-# Copy binary
+# 1. Install binary
 install -m 755 "$BIN_SRC" "$APP_DIR/usr/bin/vocalis"
 
-# Copy desktop and icon
+# 2. Install desktop entries (both at root and under /usr/share/applications)
 install -m 644 "$SCRIPT_DIR/vocalis.desktop" "$APP_DIR/vocalis.desktop"
+install -m 644 "$SCRIPT_DIR/vocalis.desktop" "$APP_DIR/usr/share/applications/vocalis.desktop"
+
+# 3. Install AppStream metadata
+if [ -f "$SCRIPT_DIR/vocalis.metainfo.xml" ]; then
+    install -m 644 "$SCRIPT_DIR/vocalis.metainfo.xml" "$APP_DIR/usr/share/metainfo/br.com.voidstudio.vocalis.metainfo.xml"
+fi
+
+# 4. Install icons (root vocalis.png, .DirIcon and standard hicolor)
 if [ -f "$ROOT_DIR/logo.png" ]; then
     install -m 644 "$ROOT_DIR/logo.png" "$APP_DIR/vocalis.png"
     install -m 644 "$ROOT_DIR/logo.png" "$APP_DIR/.DirIcon"
     install -m 644 "$ROOT_DIR/logo.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/vocalis.png"
 fi
 
-# Create AppRun
+# 5. Create canonical AppRun launcher
 cat <<'EOF' > "$APP_DIR/AppRun"
 #!/bin/sh
+set -e
 HERE="$(dirname "$(readlink -f "${0}")")"
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 exec "${HERE}/usr/bin/vocalis" "$@"
 EOF
 chmod 755 "$APP_DIR/AppRun"
 
-# Check or download appimagetool
+# 6. Locate or retrieve appimagetool
 APPIMAGETOOL="${APPIMAGETOOL:-}"
 if [ -z "$APPIMAGETOOL" ] && command -v appimagetool >/dev/null 2>&1; then
     APPIMAGETOOL="appimagetool"
@@ -53,9 +65,9 @@ if [ -z "$APPIMAGETOOL" ]; then
     TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
     curl -sL "$TOOL_URL" -o /tmp/appimagetool
     chmod +x /tmp/appimagetool
-    # In container or CI, extract appimagetool if FUSE is unavailable
+    # In container or non-FUSE environments, extract appimagetool
     if ! /tmp/appimagetool --version >/dev/null 2>&1; then
-        echo "==> Extracting appimagetool (no FUSE environment)..."
+        echo "==> Extracting appimagetool for non-FUSE environment..."
         (cd /tmp && ./appimagetool --appimage-extract >/dev/null)
         APPIMAGETOOL="/tmp/squashfs-root/AppRun"
     else
@@ -67,6 +79,6 @@ mkdir -p "$DIST_DIR"
 APPIMAGE_OUTPUT="$DIST_DIR/Vocalis-${VERSION}-x86_64.AppImage"
 
 echo "==> Generating AppImage: $APPIMAGE_OUTPUT..."
-ARCH=x86_64 "$APPIMAGETOOL" "$APP_DIR" "$APPIMAGE_OUTPUT"
+ARCH=x86_64 "$APPIMAGETOOL" --no-appstream "$APP_DIR" "$APPIMAGE_OUTPUT"
 
 echo "==> AppImage created successfully: $APPIMAGE_OUTPUT"

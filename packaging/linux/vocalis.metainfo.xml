@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>br.com.voidstudio.vocalis</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Vocalis</name>
+  <summary>AI-Powered Noise Reduction Studio and Virtual Microphone</summary>
+  <description>
+    <p>
+      Vocalis is a high-performance desktop audio engineering studio combining
+      stochastic spectral noise subtraction, Butterworth acoustic high-pass filters,
+      and adaptive noise gates for clean recordings and real-time virtual microphone streaming.
+    </p>
+  </description>
+  <launchable type="desktop-id">vocalis.desktop</launchable>
+  <url type="homepage">https://www.voidstudio.com.br</url>
+  <url type="bugtracker">https://github.com/pedrodavi120/vocalis-noise-reduction/issues</url>
+  <provides>
+    <binary>vocalis</binary>
+  </provides>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>AudioVideoEditing</category>
+  </categories>
+</component>

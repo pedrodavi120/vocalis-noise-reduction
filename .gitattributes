@@ -1,7 +1,10 @@
 # Set default behavior to automatically normalize line endings
 * text=auto
 
-# Force shell scripts and desktop files to use LF (crucial for Linux runners)
+# Force shell scripts, maintenance hooks and desktop files to use LF (crucial for Linux runners)
 *.sh text eol=lf
 *.desktop text eol=lf
 *.spec text eol=lf
+postinst text eol=lf
+postrm text eol=lf
+*.xml text eol=lf
