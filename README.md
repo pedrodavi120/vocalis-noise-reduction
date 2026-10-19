@@ -25,8 +25,9 @@
 - [Como Funciona o Microfone Virtual](#como-funciona-o-microfone-virtual)
   - [No Linux](#no-linux)
   - [No Windows](#no-windows)
-- [Instalação e Execução](#instalação-e-execução)
-- [Empacotamento com PyInstaller](#empacotamento-com-pyinstaller)
+- [Instaladores Oficiais (Windows e Linux)](#instaladores-oficiais-windows-e-linux)
+- [Instalação e Execução via Código](#instalação-e-execução-via-código)
+- [Geração dos Instaladores e Binários](#geração-dos-instaladores-e-binários)
 - [Testes Automatizados](#testes-automatizados)
 - [Como Contribuir](#como-contribuir)
 - [Licença](#licença)
@@ -81,7 +82,21 @@ No Windows, o Vocalis roteia o streaming tratado para um cabo de áudio virtual 
 
 ---
 
-## Instalação e Execução
+## Instaladores Oficiais (Windows e Linux)
+
+Na aba [Releases](https://github.com/pedrodavi120/vocalis-noise-reduction/releases) estão disponíveis pacotes e instaladores prontos para uso em ambiente de produção:
+
+| Plataforma | Formato | Descrição |
+| :--- | :--- | :--- |
+| **Windows 10 / 11** (x64) | `Vocalis-Setup-vX.Y.Z-x64.exe` | **Instalador com assistente**, atalhos no Menu Iniciar/Área de Trabalho e desinstalador limpo. |
+| **Windows 10 / 11** (x64) | `vocalis.exe` | Binário standalone portátil (sem necessidade de instalação). |
+| **Linux (Debian, Ubuntu, Mint)** | `vocalis_X.Y.Z_amd64.deb` | **Instalador de pacote nativo** com integração com o menu de aplicativos e dependências de áudio. |
+| **Linux (Universal)** | `Vocalis-X.Y.Z-x86_64.AppImage` | Pacote universal executável em qualquer distribuição Linux sem root. |
+| **Linux (Standalone)** | `vocalis` | Binário executável independente para linha de comando / scripts. |
+
+---
+
+## Instalação e Execução via Código
 
 ### Pré-requisitos
 - Python 3.10 ou superior.
@@ -107,18 +122,41 @@ python run.py
 
 ---
 
-## Empacotamento com PyInstaller
+## Geração dos Instaladores e Binários
 
-Para gerar o executável binário independente (sem necessidade de ter Python instalado na máquina de destino):
+### 1. Windows (10 e 11)
+
+Para gerar o instalador do Windows localmente, é necessário ter o [Inno Setup 6](https://jrsoftware.org/isdl.php) instalado (ou via `winget install JRSoftware.InnoSetup` / `choco install innosetup`):
+
+```powershell
+# 1. Compilar executável base com PyInstaller
+pyinstaller vocalis.spec
+
+# 2. Compilar instalador oficial Inno Setup
+powershell -ExecutionPolicy Bypass -File packaging/windows/build_installer.ps1
+```
+O instalador final `Vocalis-Setup-v1.0.0-x64.exe` será gerado em `dist/`.
+
+### 2. Linux (Debian `.deb` e AppImage)
+
+No ambiente Linux:
 
 ```bash
-# Instale o pyinstaller
-pip install pyinstaller
-
-# Gere o executável
+# 1. Compilar executável base com PyInstaller
 pyinstaller vocalis.spec
+
+# 2. Gerar pacote Debian / Ubuntu (.deb)
+chmod +x packaging/linux/build_deb.sh
+./packaging/linux/build_deb.sh 1.0.0
+
+# 3. Gerar pacote universal AppImage
+chmod +x packaging/linux/build_appimage.sh
+./packaging/linux/build_appimage.sh 1.0.0
 ```
-O executável final estará disponível no diretório `dist/`.
+Os arquivos gerados estarão disponíveis em `dist/`:
+- `vocalis_1.0.0_amd64.deb`
+- `Vocalis-1.0.0-x86_64.AppImage`
+- `vocalis` (binário nativo)
 
 ---
 

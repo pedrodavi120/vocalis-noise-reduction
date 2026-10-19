@@ -11,11 +11,22 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows Binary (.exe)
+    name: Build Windows (Portable & Setup Installer)
     runs-on: windows-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = "1.0.0"
+          if ($env:GITHUB_REF -match "refs/tags/v(.+)") {
+            $ver = $Matches[1]
+          }
+          Write-Host "Target Version: $ver"
+          "version=$ver" >> $env:GITHUB_OUTPUT
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -29,22 +40,47 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build Executable with PyInstaller
+      - name: Build Standalone Executable with PyInstaller
         run: |
           pyinstaller vocalis.spec
 
-      - name: Upload Windows Artifact
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress --yes
+
+      - name: Build Windows Installer with Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            $iscc = (Get-Command ISCC.exe -ErrorAction Stop).Source
+          }
+          & $iscc /DMyAppVersion="${{ steps.version.outputs.version }}" packaging/windows/vocalis.iss
+
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: vocalis-windows-x64
-          path: dist/vocalis.exe
+          name: vocalis-windows-artifacts
+          path: |
+            dist/vocalis.exe
+            dist/Vocalis-Setup-*.exe
 
   build-linux:
-    name: Build Linux Binary
+    name: Build Linux (Portable, .deb & AppImage)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Determine Version
+        id: version
+        run: |
+          VER="1.0.0"
+          if [[ "$GITHUB_REF" =~ refs/tags/v(.+) ]]; then
+            VER="${BASH_REMATCH[1]}"
+          fi
+          echo "Target Version: $VER"
+          echo "version=$VER" >> $GITHUB_OUTPUT
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -55,9 +91,9 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libportaudio2 libjack-jackd2-0 binutils
+          sudo apt-get install -y libportaudio2 libjack-jackd2-0 binutils curl file desktop-file-utils
 
-      - name: Install Dependencies
+      - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -67,11 +103,24 @@ jobs:
         run: |
           pyinstaller vocalis.spec
 
-      - name: Upload Linux Artifact
+      - name: Build Debian (.deb) Package
+        run: |
+          chmod +x packaging/linux/build_deb.sh
+          ./packaging/linux/build_deb.sh "${{ steps.version.outputs.version }}"
+
+      - name: Build AppImage Package
+        run: |
+          chmod +x packaging/linux/build_appimage.sh
+          ./packaging/linux/build_appimage.sh "${{ steps.version.outputs.version }}"
+
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: vocalis-linux-x64
-          path: dist/vocalis
+          name: vocalis-linux-artifacts
+          path: |
+            dist/vocalis
+            dist/*.deb
+            dist/*.AppImage
 
   release:
     name: Publish GitHub Release
@@ -79,24 +128,32 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - name: Download Windows Binary
+      - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: vocalis-windows-x64
+          name: vocalis-windows-artifacts
           path: release-assets/windows
 
-      - name: Download Linux Binary
+      - name: Download Linux Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: vocalis-linux-x64
+          name: vocalis-linux-artifacts
           path: release-assets/linux
+
+      - name: Organize Release Files
+        run: |
+          mkdir -p release-files
+          cp release-assets/windows/*.exe release-files/
+          cp release-assets/linux/*.deb release-files/
+          cp release-assets/linux/*.AppImage release-files/
+          cp release-assets/linux/vocalis release-files/vocalis-linux-x64
+          ls -lah release-files/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            release-assets/windows/vocalis.exe
-            release-assets/linux/vocalis
+          files: release-files/*
           draft: false
           prerelease: false
           generate_release_notes: true
+

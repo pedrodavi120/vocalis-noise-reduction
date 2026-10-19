@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Vocalis
+GenericName=Noise Reduction Studio
+Comment=AI-Powered Noise Reduction Studio & Virtual Microphone
+Exec=vocalis
+Icon=vocalis
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;AudioVideoEditing;Utility;
+Keywords=noise;reduction;audio;microphone;ai;voice;vocalis;
+StartupNotify=true
+StartupWMClass=vocalis
